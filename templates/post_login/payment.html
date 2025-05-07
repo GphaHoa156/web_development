@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Оплата{% endblock %}
+{% block content %}
+<h2>Оплата</h2>
+
+<!-- Кнопка добавления -->
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#paymentModal">➕ Добавить оплату</button>
+
+<!-- Модальное окно добавления/редактирования -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('save_payments_route') }}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="paymentModalLabel">Добавить оплату</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="payment_id" id="payment_id">
+          <div class="mb-3">
+            <label class="form-label">ID бронирования</label>
+            <input type="number" name="booking_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Сумма</label>
+            <input type="number" step="0.01" name="amount" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Метод оплаты</label>
+            <input type="text" name="payment_method" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Дата оплаты</label>
+            <input type="date" name="payment_date" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Фильтр -->
+<form method="get" class="d-flex justify-content-end mb-2" style="gap: 10px;">
+  <input type="text" name="filter_value" class="form-control w-auto" placeholder="Поиск по ID бронирования..." value="{{ filter_value }}">
+  <button type="submit" class="btn btn-primary">Фильтровать</button>
+</form>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>ID бронирования</th>
+      <th>Сумма</th>
+      <th>Метод оплаты</th>
+      <th>Дата оплаты</th>
+      <th>Действия</th>
+      <th>Счёт</th>
+      <th>Контракт</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if payments %}
+      {% for p in payments %}
+      <tr>
+        <td>{{ p.payment_id }}</td>
+        <td>{{ p.booking_id }}</td>
+        <td>{{ p.amount }}</td>
+        <td>{{ p.payment_method }}</td>
+        <td>{{ p.payment_date }}</td>
+        <td>
+          <button class="btn btn-sm btn-info" onclick="editPayment('{{ p.payment_id }}', '{{ p.booking_id }}', '{{ p.amount }}', '{{ p.payment_method }}', '{{ p.payment_date }}')">✏️</button>
+          <form method="POST" action="{{ url_for('delete_payments_route', payment_id=p.payment_id) }}" style="display:inline;">
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту оплату?')">🗑️</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="6" class="text-center">Нет данных.</td></tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<div class="pagination-footer">
+  <form method="get" id="pagination-form" class="d-flex align-items-center">
+    <label class="me-2 mb-0">Показать</label>
+    <select class="form-select form-select-sm w-auto me-2" name="per_page" onchange="document.getElementById('pagination-form').submit()">
+      <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+      <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+      <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+    </select>
+    <span class="mb-0">записей</span>
+    <input type="hidden" name="page" value="1">
+    <input type="hidden" name="filter_column" value="{{ filter_column }}">
+    <input type="hidden" name="filter_value" value="{{ filter_value }}">
+  </form>
+
+  <a class="btn btn-outline-secondary me-1" href="{{ url_for('payments_route', page=1, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">В начало</a>
+  <a class="btn btn-outline-secondary me-1" href="{{ url_for('payments_route', page=pagination.prev_num, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Назад</a>
+  <span class="btn btn-primary disabled">{{ pagination.page }}</span>
+  <a class="btn btn-outline-secondary ms-1" href="{{ url_for('payments_route', page=pagination.next_num, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Вперёд</a>
+  <a class="btn btn-outline-secondary ms-1" href="{{ url_for('payments_route', page=pagination.pages, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">В конец</a>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let isEditMode = false;
+
+    document.querySelector("button[data-bs-target='#paymentModal']").addEventListener('click', () => {
+      isEditMode = false;
+    });
+
+    function editPayment(id, booking_id, amount, method, date) {
+      isEditMode = true;
+      const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+      modal.show();
+      document.getElementById('paymentModalLabel').innerText = 'Редактировать оплату';
+      document.getElementById('payment_id').value = id;
+      document.querySelector("input[name='booking_id']").value = booking_id;
+      document.querySelector("input[name='amount']").value = amount;
+      document.querySelector("input[name='payment_method']").value = method;
+      document.querySelector("input[name='payment_date']").value = date;
+    }
+
+    document.getElementById('paymentModal').addEventListener('show.bs.modal', function () {
+      if (!isEditMode) {
+        document.getElementById('paymentModalLabel').innerText = 'Добавить оплату';
+        document.getElementById('payment_id').value = '';
+        document.querySelector("input[name='booking_id']").value = '';
+        document.querySelector("input[name='amount']").value = '';
+        document.querySelector("input[name='payment_method']").value = '';
+        document.querySelector("input[name='payment_date']").value = '';
+      }
+    });
+
+    window.editPayment = editPayment;
+  });
+</script>
+{% endblock %}

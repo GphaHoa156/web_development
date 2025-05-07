@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Главная страница{% endblock %}
+{% block content %}
+<h1 style="text-align:center;">Статистика Диаграммы</h1>
+{% for chart in charts %}
+  <div style="margin: 40px auto; width: 90%;">
+    {{ chart | safe }}
+  </div>
+{% endfor %}
+
+{% endblock %}
+

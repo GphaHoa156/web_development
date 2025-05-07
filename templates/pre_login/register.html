@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='pre_log.css') }}">
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-box">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="logo-img">
+            </div>
+            <h2>Регистрация в Clever CRM</h2>
+            {% if message %}
+                <div class="success-message">
+                    {{ message }}
+                </div>
+            {% endif %}
+            <form action ="{{ url_for('register_route') }}" method = "POST">
+                <input type="text" id="username" name = "username" placeholder="Введите имя пользователя" class="input-field" required>
+                <input type="employee_code" id="employee_code" name = "employee_code" placeholder="Введите код сотрудника" class="input-field" required>
+                <input type="personal_password" id="personal_password" name = "personal_password" placeholder="Введите личная пароль" class="input-field" required>
+                <input type="password" id="password" name = "password" placeholder="Введите пароль" class="input-field" required>
+                <input type="password" id="confirm-password"name = "confirm-password" placeholder="Подтвердите пароль" class="input-field" required>
+                
+                <button type="submit" class="register-button">Зарегистрироваться</button>
+                <p class="login-text">У вас уже есть аккаунт? <a href="{{ url_for('login_route') }}" class="login-link">Войти</a></p>
+            </form>
+        </div>
+    </div>
+    <script>
+        window.onload = function() {
+            var message = "{{ message }}";
+            if (message) {
+                alert(message);
+                window.location.href = "{{ url_for('login_route') }}";  
+            }
+        };
+    </script>
+</body>
+</html>

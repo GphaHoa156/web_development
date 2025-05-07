@@ -1,0 +1,126 @@
+body {
+    font-family: Arial, sans-serif;
+    background: url('img/background.png') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.login-box {
+    background-color: rgba(222, 225, 243, 0.9);
+    padding: 30px;
+    width: 350px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.logo {
+    margin-bottom: 10px;
+}
+
+.logo-img {
+    width: 120px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 18px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+p {
+    font-size: 14px;
+    color: #666;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.options {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 12px;
+}
+
+.forgot-password {
+    text-decoration: none;
+    color: #007BFF;
+}
+
+.login-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #0044cc;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.login-button:hover {
+    background-color: #0033a0;
+}
+
+.register-text {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #666;
+}
+
+.register-link {
+    text-decoration: none;
+    color: #007BFF;
+}
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('img/background.png') no-repeat center center fixed;
+    background-size: cover;
+}
+.register-box {
+    background-color: rgba(152, 221, 233, 0.884); /* Màu trắng với độ trong suốt nhẹ */
+    padding: 30px;
+    width: 400px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.register-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #d3308a; /* Xanh đậm */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    text-align: center;
+}

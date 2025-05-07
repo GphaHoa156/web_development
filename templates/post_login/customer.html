@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block title %}Khách hàng{% endblock %}
+{% block content %}
+<h2>Khách hàng</h2>
+
+<!-- Nút thêm -->
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#customerModal">➕ Thêm khách hàng</button>
+
+<!-- Modal thêm/sửa -->
+<div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('save_customers_route') }}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="customerModalLabel">Thêm khách hàng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="customer_id" id="customer_id">
+          <div class="mb-3">
+            <label class="form-label">Tên khách hàng</label>
+            <input type="text" name="customer_name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ngày sinh</label>
+            <input type="date" name="dob" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Quốc tịch</label>
+            <input type="text" name="nationality" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Số hộ chiếu</label>
+            <input type="text" name="passport_number" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">SĐT</label>
+            <input type="text" name="personal_phone" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Lưu</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Lọc -->
+<form method="get" class="d-flex justify-content-end mb-2" style="gap: 10px;">
+  <input type="text" name="filter_value" class="form-control w-auto" placeholder="Tìm theo tên..." value="{{ filter_value }}">
+  <button type="submit" class="btn btn-primary">Lọc</button>
+</form>
+
+<!-- Bảng danh sách -->
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Tên khách hàng</th>
+      <th>Ngày sinh</th>
+      <th>Quốc tịch</th>
+      <th>Email</th>
+      <th>Hộ chiếu</th>
+      <th>Điện thoại</th>
+      <th>Chức năng</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if customers %}
+      {% for c in customers %}
+      <tr>
+        <td>{{ c.customer_id }}</td>
+        <td>{{ c.customer_name }}</td>
+        <td>{{ c.dob }}</td>
+        <td>{{ c.nationality }}</td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.passport_number }}</td>
+        <td>{{ c.personal_phone }}</td>
+        <td>
+          <button class="btn btn-sm btn-info" onclick="editCustomer('{{ c.customer_id }}', '{{ c.customer_name }}', '{{ c.dob }}', '{{ c.nationality }}', '{{ c.email }}', '{{ c.passport_number }}', '{{ c.personal_phone }}')">✏️</button>
+          <form method="POST" action="{{ url_for('delete_customers_route', customer_id=c.customer_id) }}" style="display:inline;">
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa khách hàng này không?')">🗑️</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="8" class="text-center">Chưa có khách hàng nào.</td></tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<div class="pagination-footer">
+    <form method="get" id="pagination-form" class="d-flex align-items-center">
+      <label class="me-2 mb-0">Hiển thị</label>
+      <select class="form-select form-select-sm w-auto me-2" name="per_page" onchange="document.getElementById('pagination-form').submit()">
+        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+        <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+      </select>
+      <span class="mb-0">mục</span>
+      <input type="hidden" name="page" value="1">
+      <input type="hidden" name="filter_column" value="{{ filter_column }}">
+      <input type="hidden" name="filter_value" value="{{ filter_value }}">
+    </form>
+  
+    <a class="btn btn-outline-secondary me-1" href="{{ url_for('customer_content_route', page=1, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Đầu</a>
+    <a class="btn btn-outline-secondary me-1" href="{{ url_for('customer_content_route', page=pagination.prev_num, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Trước</a>
+    <span class="btn btn-primary disabled">{{ pagination.page }}</span>
+    <a class="btn btn-outline-secondary ms-1" href="{{ url_for('customer_content_route', page=pagination.next_num, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Sau</a>
+    <a class="btn btn-outline-secondary ms-1" href="{{ url_for('customer_content_route', page=pagination.pages, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Cuối</a>
+  </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let isEditMode = false;
+    
+      document.querySelector("button[data-bs-target='#customerModal']").addEventListener('click', () => {
+        isEditMode = false;
+      });
+    
+      function editCustomer(id, name, dob, nationality, email, passport, phone) {
+        isEditMode = true;
+        const modal = new bootstrap.Modal(document.getElementById('customerModal'));
+        modal.show();
+        document.getElementById('customerModalLabel').innerText = 'Chỉnh sửa khách hàng';
+        document.querySelector("#customer_id").value = id;
+        document.querySelector("input[name='customer_name']").value = name;
+        document.querySelector("input[name='dob']").value = dob;
+        document.querySelector("input[name='nationality']").value = nationality;
+        document.querySelector("input[name='email']").value = email;
+        document.querySelector("input[name='passport_number']").value = passport;
+        document.querySelector("input[name='personal_phone']").value = phone;
+      }
+    
+      document.getElementById('customerModal').addEventListener('show.bs.modal', function () {
+        if (!isEditMode) {
+          document.getElementById('customerModalLabel').innerText = 'Thêm khách hàng';
+          document.getElementById('customer_id').value = '';
+          document.querySelector("input[name='customer_name']").value = '';
+          document.querySelector("input[name='dob']").value = '';
+          document.querySelector("input[name='nationality']").value = '';
+          document.querySelector("input[name='email']").value = '';
+          document.querySelector("input[name='passport_number']").value = '';
+          document.querySelector("input[name='personal_phone']").value = '';
+        }
+      });
+    
+      // Gắn hàm vào window để có thể gọi từ HTML
+      window.editCustomer = editCustomer;
+    });
+    </script>
+    
+{% endblock %}

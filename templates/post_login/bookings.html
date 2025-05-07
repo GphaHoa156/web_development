@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}Đơn hàng{% endblock %}
+{% block content %}
+<h2>Bookings</h2>
+
+<!-- Nút thêm -->
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#bookingModal">➕ Tạo đơn mới</button>
+
+<!-- Modal thêm/sửa -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('save_bookings_route') }}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="bookingModalLabel">Tạo đơn mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="booking_id" id="booking_id">
+          <div class="mb-3">
+            <label class="form-label">ID Khách hàng</label>
+            <input type="number" name="customer_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ID Dịch vụ</label>
+            <input type="number" name="service_id" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ngày Check-in</label>
+            <input type="date" name="checkin_date" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ngày Check-out</label>
+            <input type="date" name="checkout_date" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Trạng thái</label>
+            <select name="booking_status" class="form-select">
+              <option>Pending</option>
+              <option>Confirmed</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Lưu</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Form lọc -->
+<form method="get" class="d-flex justify-content-end mb-2" style="gap: 10px;">
+  <select name="filter_column" class="form-select w-auto">
+    <option value="">-- Lọc theo --</option>
+    <option value="customer_id" {% if filter_column=='customer_id' %}selected{% endif %}>Khách hàng</option>
+    <option value="service_id" {% if filter_column=='service_id' %}selected{% endif %}>Dịch vụ</option>
+    <option value="checkin_date" {% if filter_column=='checkin_date' %}selected{% endif %}>Check-in</option>
+    <option value="checkout_date" {% if filter_column=='checkout_date' %}selected{% endif %}>Check-out</option>
+    <option value="booking_status" {% if filter_column=='booking_status' %}selected{% endif %}>Trạng thái</option>
+    <option value="date_created" {% if filter_column=='date_created' %}selected{% endif %}>Ngày tạo</option>
+  </select>
+  <input type="text" name="filter_value" class="form-control w-auto" placeholder="Nhập để lọc..." value="{{ filter_value }}">
+  <input type="hidden" name="per_page" value="{{ per_page }}">
+  <input type="hidden" name="page" value="1">
+  <button type="submit" class="btn btn-primary">Lọc</button>
+</form>
+
+<!-- Bảng danh sách -->
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Booking ID</th>
+      <th>Khách hàng</th>
+      <th>Dịch vụ</th>
+      <th>Check-in</th>
+      <th>Check-out</th>
+      <th>Trạng thái</th>
+      <th>Ngày tạo</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if bookings %}
+      {% for b in bookings %}
+        <tr>
+          <td>{{ b.booking_id }}</td>
+          <td>{{ b.customer_id }}</td>
+          <td>{{ b.service_id }}</td>
+          <td>{{ b.checkin_date }}</td>
+          <td>{{ b.checkout_date }}</td>
+          <td>{{ b.booking_status }}</td>
+          <td>{{ b.date_created }}</td>
+          <td>
+            <button onclick="editBooking('{{ b.booking_id }}', '{{ b.customer_id }}', '{{ b.service_id }}', '{{ b.checkin_date }}', '{{ b.checkout_date }}', '{{ b.booking_status }}')" class="btn btn-sm btn-info">✏️</button>
+            <form method="POST" action="{{ url_for('delete_bookings_route', booking_id=b.booking_id) }}" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa đặt chỗ này không?')">🗑️</button>
+            </form>          
+          </td>
+        </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="8">Chưa có đặt chỗ nào.</td></tr>
+    {% endif %}
+  </tbody>
+</table>
+
+<!-- Phân trang -->
+<div class="pagination-footer">
+  <form method="get" id="pagination-form" class="d-flex align-items-center">
+    <label class="me-2 mb-0">Hiển thị</label>
+    <select class="form-select form-select-sm w-auto me-2" name="per_page" onchange="document.getElementById('pagination-form').submit()">
+      <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+      <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+      <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+    </select>
+    <span class="mb-0">mục</span>
+    <input type="hidden" name="page" value="1">
+    <input type="hidden" name="filter_column" value="{{ filter_column }}">
+    <input type="hidden" name="filter_value" value="{{ filter_value }}">
+  </form>
+
+  <a class="btn btn-outline-secondary me-1" href="{{ url_for('bookings_route', page=1, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Đầu</a>
+  <a class="btn btn-outline-secondary me-1" href="{{ url_for('bookings_route', page=pagination.prev_num, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Trước</a>
+  <span class="btn btn-primary disabled">{{ pagination.page }}</span>
+  <a class="btn btn-outline-secondary ms-1" href="{{ url_for('bookings_route', page=pagination.next_num, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Sau</a>
+  <a class="btn btn-outline-secondary ms-1" href="{{ url_for('bookings_route', page=pagination.pages, per_page=per_page, filter_column=filter_column, filter_value=filter_value) }}">Cuối</a>
+</div>
+
+<!-- JS xử lý form -->
+<script>
+  let isEditMode = false;
+
+  document.querySelector("button[data-bs-target='#bookingModal']").addEventListener('click', () => {
+    isEditMode = false;
+  });
+
+  function editBooking(id, customer, service, checkin, checkout, status) {
+    isEditMode = true;
+    const modal = new bootstrap.Modal(document.getElementById('bookingModal'));
+    modal.show();
+    document.getElementById('bookingModalLabel').innerText = 'Chỉnh sửa đặt chỗ';
+    document.querySelector("#booking_id").value = id;
+    document.querySelector("input[name='customer_id']").value = customer;
+    document.querySelector("input[name='service_id']").value = service;
+    document.querySelector("input[name='checkin_date']").value = checkin;
+    document.querySelector("input[name='checkout_date']").value = checkout;
+    document.querySelector("select[name='booking_status']").value = status;
+  }
+
+  document.getElementById('bookingModal').addEventListener('show.bs.modal', function () {
+    if (!isEditMode) {
+      document.getElementById('bookingModalLabel').innerText = 'Tạo đơn mới';
+      document.getElementById('booking_id').value = '';
+      document.querySelector("input[name='customer_id']").value = '';
+      document.querySelector("input[name='service_id']").value = '';
+      document.querySelector("input[name='checkin_date']").value = '';
+      document.querySelector("input[name='checkout_date']").value = '';
+      document.querySelector("select[name='booking_status']").value = 'Pending';
+    }
+  });
+</script>
+{% endblock %}

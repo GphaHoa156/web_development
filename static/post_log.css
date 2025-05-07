@@ -1,0 +1,77 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+table th, table td {
+    vertical-align: middle !important;
+    font-size: 14px;
+}
+
+table thead th {
+    background-color: #f1f1f1;
+    text-align: center;
+}
+
+table tbody td {
+    text-align: center;
+    white-space: pre-wrap; /* Cho mô tả hiển thị xuống dòng */
+}
+
+h4 {
+    margin-bottom: 20px;
+}
+
+select, input[type="text"] {
+    font-size: 14px;
+    padding: 4px 8px;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border: none;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+}
+.d-flex {
+    display: flex;
+  }
+  
+  .justify-content-between {
+    justify-content: space-between;
+  }
+  
+  .align-items-center {
+    align-items: center;
+  }
+  
+  .form-select, .form-control {
+    height: 30px;
+    font-size: 14px;
+  }
+  
+  .w-auto {
+    width: auto;
+  }
+  
+  .me-2 {
+    margin-right: 8px;
+  }
+  
+  .mb-0 {
+    margin-bottom: 0;
+  }
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
