@@ -1,0 +1,11 @@
+data_path: data/raw/bank_churn_dataset.csv
+target_column: exit
+model_path: models/model.pkl
+metadata_path: models/metadata.json
+metrics_path: reports/metrics.json
+predictions_path: reports/predictions.csv
+test_size: 0.2
+random_state: 42
+catboost_iterations: 300
+catboost_learning_rate: 0.06
+catboost_depth: 6
